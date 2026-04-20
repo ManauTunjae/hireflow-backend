@@ -30,3 +30,30 @@ export async function registerUser(req, res) {
     res.status(500).json({ message: "Server error", err: err.message });
   }
 }
+
+// Logga in en användare
+export async function loginUser(req, res) {
+  try {
+    const { email, password } = req.body;
+    // Hitta användare inkludera lösenordhashen
+    const user = await User.findOne({ email }).select("+passwordHash");
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentails" });
+    }
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+    res.status(200).json({
+      message: "Login successful",
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", err: error.message });
+  }
+}
