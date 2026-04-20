@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 export const validate = (schema) => (req, res, next) => {
     try {
         // Här validera body, query och params mot schemat
@@ -17,4 +19,3 @@ export const validate = (schema) => (req, res, next) => {
         });
     }
 };
- 
