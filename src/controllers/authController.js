@@ -1,4 +1,5 @@
-import User from "../models/User";
+import User from "../models/User.js";
+import jwt from "jsonwebtoken";
 
 // Skapa en ny användare
 export async function registerUser(req, res) {
@@ -12,8 +13,7 @@ export async function registerUser(req, res) {
       username,
       email,
       passwordHash: password,
-      role,
-      userRole,
+      role: role || "recruiter",
       company,
     });
     res.status(201).json({
@@ -24,6 +24,7 @@ export async function registerUser(req, res) {
         email: user.email,
         role: user.role,
         company: user.company,
+        token: generateToken(user._id),
       },
     });
   } catch (err) {
@@ -51,9 +52,17 @@ export async function loginUser(req, res) {
         username: user.username,
         email: user.email,
         role: user.role,
+        token: generateToken(user._id),
       },
     });
   } catch (error) {
     res.status(500).json({ message: "Server error", err: error.message });
   }
 }
+
+// JWT token generation
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: "1d",
+  });
+};
