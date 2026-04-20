@@ -1,19 +1,23 @@
-import { z } from "zod";
+import { body, validationResult } from 'express-validator';
 
-export const registerSchema = z.object({
-  body: z.object({
-    username: z.string().min(3, "Uername must be at least 3 characters long"),
-    email: z.string().email("Invalid email format"),
-    password: z.string().min(6, "Password must be at least 6 charactors long"),
-    company: z
-      .string()
-      .min(3, "Company name must be at least 3 characters long"),
-  }),
-});
+export const handleValidationErrors = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  next();
+};
 
-export const loginSchema = z.object({
-  body: z.object({
-    email: z.string().email("Invalid email format"),
-    password: z.string().min(6, "Password must be at least 6 charactors long"),
-  }),
-});
+export const validateRegister = [
+  body("username").isLength({ min: 3 }).withMessage("Username must be at least 3 characters long"),
+  body("email").isEmail().withMessage("Invalid email format"),
+  body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters long"),
+  body("company").isLength({ min: 3 }).withMessage("Company name must be at least 3 characters long"),
+  handleValidationErrors,
+];
+
+export const validateLogin = [
+  body("email").isEmail().withMessage("Invalid email format"),
+  body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters long"),
+  handleValidationErrors,
+];
