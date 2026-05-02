@@ -17,3 +17,14 @@ export async function createJob(req, res) {
       .json({ status: "error", message: "Server error: Could not create job" });
   }
 };
+
+export async function getJobs(req, res) {
+  try {
+    const query = {};
+    // Hämta alla jobb och populerar skaparen med username och email
+    const jobs = await Job.find(query).populate("createdBy", "username email");
+    res.status(200).json({ status: "success", results: jobs.length, data: jobs });
+  } catch (error) {
+    res.status(500).json({ status: "error", message: "Server error: Could not fetch jobs" });
+  }
+}
