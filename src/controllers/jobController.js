@@ -20,9 +20,8 @@ export async function createJob(req, res) {
 
 export async function getJobs(req, res) {
   try {
-    const query = {};
     // Hämta alla jobb och populerar skaparen med username och email
-    const jobs = await Job.find(query).populate("createdBy", "username email");
+    const jobs = await Job.find().populate("createdBy", "username email");
     res
       .status(200)
       .json({ status: "success", results: jobs.length, data: jobs });
@@ -30,6 +29,25 @@ export async function getJobs(req, res) {
     res
       .status(500)
       .json({ status: "error", message: "Server error: Could not fetch jobs" });
+  }
+}
+
+export async function getMyJobs(req, res) {
+  try {
+    const jobs = await Job.find({ createdBy: req.user.id }).populate(
+      "createdBy",
+      "username email",
+    );
+    res
+      .status(200)
+      .json({ status: "success", results: jobs.length, data: jobs });
+  } catch (error) {
+    res
+      .status(500)
+      .json({
+        status: "error",
+        message: "Server error: Could not fetch my jobs",
+      });
   }
 }
 
