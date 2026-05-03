@@ -56,3 +56,44 @@ export const validateJob = [
 
   handleValidationErrors,
 ];
+
+export const validateJobUpdate = [
+  body("title")
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ min: 2 })
+    .withMessage("Title must be at least 2 characters long"),
+
+  body("description")
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ min: 10 })
+    .withMessage("Description must be at least 10 characters long"),
+
+  body("company")
+    .optional()
+    .isLength({ min: 2 })
+    .notEmpty()
+    .withMessage("Company name must be at least 2 characters long")
+    .isString()
+    .withMessage("Company name must be a string")
+    .trim(),
+
+  body("location").optional().isString().trim().notEmpty(),
+
+  body("status")
+    .optional()
+    .isIn(["open", "closed", "draft"])
+    .withMessage("Invalid status value"),
+
+  body("salary").optional().isNumeric().withMessage("Salary must be a number"),
+
+  body("requirements")
+    .optional()
+    .isArray()
+    .withMessage("Requirements must be an array"),
+
+  handleValidationErrors,
+];
