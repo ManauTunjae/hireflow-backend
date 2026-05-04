@@ -1,7 +1,12 @@
 import mongoose from "mongoose";
 
-const candidateSchema = new mogoose.Schema(
+const candidateSchema = new mongoose.Schema(
   {
+    jobId: {
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: "Job",
+      required: true,
+    },
     name: {
       type: String,
       required: true,
@@ -21,7 +26,7 @@ const candidateSchema = new mogoose.Schema(
       },
     },
     phone: {
-      type: Number,
+      type: String,
       required: true,
       trim: true,
     },
