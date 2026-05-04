@@ -12,6 +12,13 @@ const candidateSchema = new mogoose.Schema(
       required: true,
       trim: true,
       unique: true,
+      lowercase: true,
+      validate: {
+        validator: function (v) {
+          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+        },
+        message: (props) => `${props.value} is not a valid email address!`,
+      },
     },
     phone: {
       type: Number,
@@ -24,13 +31,13 @@ const candidateSchema = new mogoose.Schema(
       default: "applied",
     },
     LinkedIn: {
-        type: String,
-        trim: true,
+      type: String,
+      trim: true,
     },
     Github: {
-        type: String,
-        trim: true,
-    }
+      type: String,
+      trim: true,
+    },
   },
   { timestamps: true },
 );
