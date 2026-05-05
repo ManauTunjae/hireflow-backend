@@ -1,13 +1,19 @@
 import express from "express";
-import { registerRecruiter, loginRecruiter } from "../controllers/authController.js";
 import {
-  validateRegister,
+  registerRecruiter,
+  registerCandidate,
+  loginUser,
+} from "../controllers/authController.js";
+import {
+  validateRegisterHR,
+  validateRegisterCandidate,
   validateLogin,
 } from "../validations/userValidation.js";
 
 const router = express.Router();
 
-router.post("/register-recruiter", validateRegister, registerRecruiter);
-router.post("/login-recruiter", validateLogin, loginRecruiter);
+router.post("/register-recruiter", validateRegisterHR, registerRecruiter);
+router.post("/register-candidate", validateRegisterCandidate, registerCandidate);
+router.post("/login", validateLogin, loginUser);
 
 export default router;
