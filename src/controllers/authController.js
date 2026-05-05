@@ -1,7 +1,7 @@
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 
-// Skapa en ny användare
+// Skapa en ny HR
 export async function registerRecruiter(req, res) {
   try {
     const { username, email, password, role, company } = req.body;
@@ -17,7 +17,7 @@ export async function registerRecruiter(req, res) {
       company,
     });
     res.status(201).json({
-      message: "User registered sucsessfully",
+      message: "User registered successfully",
       user: {
         id: user._id,
         username: user.username,
@@ -32,8 +32,37 @@ export async function registerRecruiter(req, res) {
   }
 }
 
+// Skapa en ny kandidat
+export async function registerCandidate(req, res) {
+  try {
+    const { username, email, password, role } = req.body;
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+    const user = await User.create({
+      username,
+      email,
+      passwordHash: password,
+      role: role || "candidate",
+    });
+    res.status(201).json({
+      message: "User registered successfully",
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        token: generateToken(user._id),
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", err: err.message });
+  }
+}
+
 // Logga in en användare
-export async function loginRecruiter(req, res) {
+export async function loginUser(req, res) {
   try {
     const { email, password } = req.body;
     // Hitta användare inkludera lösenordhashen
