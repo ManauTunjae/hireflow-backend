@@ -2,7 +2,7 @@ import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 
 // Skapa en ny användare
-export async function registerUser(req, res) {
+export async function registerRecruiter(req, res) {
   try {
     const { username, email, password, role, company } = req.body;
     const existingUser = await User.findOne({ email });
@@ -33,7 +33,7 @@ export async function registerUser(req, res) {
 }
 
 // Logga in en användare
-export async function loginUser(req, res) {
+export async function loginRecruiter(req, res) {
   try {
     const { email, password } = req.body;
     // Hitta användare inkludera lösenordhashen
