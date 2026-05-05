@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 
 const candidateSchema = new mongoose.Schema(
   {
+    userRef: {
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: "candidate",
+    },
     jobId: {
       type: mongoose.SchemaTypes.ObjectId,
       ref: "Job",
