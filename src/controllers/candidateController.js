@@ -1,5 +1,6 @@
 import Candidate from "../models/Candidate.js";
 import Documents from "../models/Documents.js";
+import Job from "../models/Job.js";
 
 export async function createCandidate(req, res) {
   try {
@@ -31,5 +32,38 @@ export async function createCandidate(req, res) {
       });
     }
     res.status(500).json({ status: "error", message: error.message });
+  }
+}
+
+export async function getAllCandidates(req, res) {
+  try {
+    // Hitta alla job som tillhör specifik HRs annonser
+    const myJobs = await Job.find({ createdBy: req.user._id }).select("_id");
+    const myJobIds = myJobs.map((job) => job._id);
+    // Filter-objekt baserar på vad HR skriver i URL:en 'candidates?status=interviwing'
+    const filter = { jobId: { $in: myJobIds } };
+    if (req.query.status) filter.status = req.query.status;
+    if (req.query.jobId) filter.jobId = req.query.jobId;
+    // Hämta kandidat baserat på filter
+    const candidates = await Candidate.find(filter)
+      .populate("jobId", "title company")
+      .sort("-createdAt"); // Visa de senaste ansökningarna först
+    if (candidates.length === 0) {
+      return res.status(200).json({
+        status: "success",
+        message: "No candidates found matching those criteria",
+        date: [],
+      });
+    }
+    res.status(200).json({
+      status: "success",
+      results: candidates.length,
+      data: candidates,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Server error: Could not fetch candidates",
+    });
   }
 }
