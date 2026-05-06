@@ -4,7 +4,8 @@ const candidateSchema = new mongoose.Schema(
   {
     userRef: {
       type: mongoose.SchemaTypes.ObjectId,
-      ref: "candidate",
+      ref: "User",
+      required: true,
     },
     jobId: {
       type: mongoose.SchemaTypes.ObjectId,
@@ -20,7 +21,6 @@ const candidateSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      unique: true,
       lowercase: true,
       validate: {
         validator: function (v) {
@@ -50,5 +50,7 @@ const candidateSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+candidateSchema.index({ email: 1, jobId: 1 }, { unique: true });
 
 export default mongoose.model("Candidate", candidateSchema);
