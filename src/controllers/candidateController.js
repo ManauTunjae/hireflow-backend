@@ -67,3 +67,32 @@ export async function getAllCandidates(req, res) {
     });
   }
 }
+
+export async function getCandidateById(req, res) {
+  try {
+    const { id } = req.params;
+    // Hämta kandidat och populera jobbet för att se vem som har skapat ansökningen
+    const candidate = await Candidate.findById(id).populate("jobId");
+    if (!candidate) {
+      res.status(404).json({ message: "Candidate not found" });
+    }
+    // Säkerställa att det denn HR peson som skapade detta job
+    // eftersom HR:en kan se kandidater på sina anonner
+    if (candidate.jobId.createdBy.toString() !== req.user.id) {
+      return res.status(403).json({
+        message:
+          "Access denied: This candidate belongs to another recuiter's job",
+      });
+    }
+    const documents = await Documents.findOne({ candidate: id });
+    res.status(200).json({
+      status: "success",
+      "candidate data" : { candidate, documents },
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Server error: Could not fetch a candidate",
+    });
+  }
+}
