@@ -127,3 +127,31 @@ export async function updateCandidate(req, res) {
     });
   }
 }
+
+export async function deleteCandidate(req, res) {
+  try {
+    const { id } = req.params;
+    const candidate = await Candidate.findById(id).populate("jobId");
+    if (!candidate) {
+      res.status(404).json({ message: "Candidate not found" });
+    }
+    if (candidate.jobId.createdBy.toString() !== req.user.id.toString()) {
+      return res.status(403).json({
+        message:
+          "Access denied: You can only delete candidates for your own jobs",
+      });
+    }
+    await Candidate.deleteMany({ candidate: id });
+    await Candidate.findByIdAndDelete(id);
+    res.status(200).json({
+      status: "success",
+      message: "Candidate deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Server error: Could not fetch a candidate",
+      error: error.message,
+    });
+  }
+}
