@@ -87,12 +87,43 @@ export async function getCandidateById(req, res) {
     const documents = await Documents.findOne({ candidate: id });
     res.status(200).json({
       status: "success",
-      "candidate data" : { candidate, documents },
+      "candidate data": { candidate, documents },
     });
   } catch (error) {
     res.status(500).json({
       status: "error",
       message: "Server error: Could not fetch a candidate",
+    });
+  }
+}
+
+export async function updateCandidate(req, res) {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const candidate = await Candidate.findById(id).populate("jobId");
+    if (!candidate) {
+      res.status(404).json({ message: "Candidate not found" });
+    }
+    if (candidate.jobId.createdBy.toString() !== req.user.id.toString()) {
+      return res.status(403).json({
+        message:
+          "Access denied: This candidate belongs to another recuiter's job",
+      });
+    }
+    candidate.status = status;
+    await candidate.save();
+
+    res.status(200).json({
+      status: "success",
+      message: `Candidate status updated to ${status}`,
+      "candidate data": { candidate, status },
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: "Server error: Could not fetch a candidate",
+      error: error.message,
     });
   }
 }
