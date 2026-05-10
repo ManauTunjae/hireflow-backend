@@ -8,10 +8,10 @@ const documentsSchema = new mongoose.Schema(
       required: true,
     },
     resume: {
-      data: String,
+      type: String,
     },
     coverLetter: {
-      data: String,
+      type: String,
     },
   },
   { timestamps: true },
