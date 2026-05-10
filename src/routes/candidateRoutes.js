@@ -11,10 +11,20 @@ import {
   validateCandidate,
   updateStatus,
 } from "../validations/candidateValidation.js";
+import upload from "../config/cloudinary.js";
 
 const router = express.Router();
 
-router.post("/", authMiddleware, validateCandidate, createCandidate);
+router.post(
+  "/",
+  authMiddleware,
+  upload.fields([
+    { name: "resume", maxCount: 1 },
+    { name: "coverLetter", maxCount: 1 },
+  ]),
+  validateCandidate,
+  createCandidate,
+);
 router.get("/", authMiddleware, getAllCandidates);
 router.get("/:id", authMiddleware, getCandidateById);
 router.patch("/:id", authMiddleware, updateStatus, updateCandidate);
