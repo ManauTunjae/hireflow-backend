@@ -20,21 +20,23 @@ const uri = process.env.MONGODB_URI;
 
 if (!uri) {
   console.log("❌ MongoDB URI is not defined in environment variables.");
-  process.exit(1);
+  // Ta bort process.exit(1) här för Vercel, så den inte dödar funktionen vid build
+} else {
+  mongoose
+    .connect(uri)
+    .then(() => console.log("✅ Connected to MongoDB"))
+    .catch((err) => console.log("❌ Error connecting to MongoDB:", err));
 }
 
-mongoose
-  .connect(uri)
-  .then(() => console.log("✅ Connected to MongoDB"))
-  .catch((err) => console.log("❌ Error connecting to MongoDB:", err));
-
 app.get("/", (req, res) => {
-  console.log(`Server is running on port ${PORT}`);
-  res.send("Hello, HireFlow!");
+  res.send("Hello, HireFlow! API is active and running. 🚀");
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// Körs bara lokalt
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
 
 export default app;
