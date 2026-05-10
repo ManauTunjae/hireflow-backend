@@ -11,18 +11,27 @@ export async function createCandidate(req, res) {
     }
     // Skapa kandidaten men namn, mejl osv.
     const newCandidate = await Candidate.create(candidateData);
+    // Hämta URL-länken från req.files(Cloudinary)
+    const resumeUrl = req.files?.["resume"]
+      ? req.files["resume"][0].path
+      : null;
+    const coverLetterUrl = req.files?.["coverLetter"]
+      ? req.files["coverLetter"][0].path
+      : null;
     // Kollar om bifogade cv och personliga brev finns
-    if (req.body.resume || req.body.coverLetter) {
+    if (resumeUrl || coverLetterUrl) {
       await Documents.create({
         candidateId: newCandidate._id,
-        resume: req.body.resume,
-        coverLetter: req.body.coverLetter,
+        resume: resumeUrl,
+        coverLetter: coverLetterUrl,
       });
+      console.log("ID för ny kandidat:", newCandidate._id);
     }
     res.status(201).json({
       status: "success",
-      message: "Candidate created successfully",
+      message: "Candidate created successfully with documents",
       data: newCandidate,
+      documents: { resume: resumeUrl, coverLetter: coverLetterUrl },
     });
   } catch (error) {
     if (error.code === 11000) {
@@ -74,17 +83,17 @@ export async function getCandidateById(req, res) {
     // Hämta kandidat och populera jobbet för att se vem som har skapat ansökningen
     const candidate = await Candidate.findById(id).populate("jobId");
     if (!candidate) {
-      res.status(404).json({ message: "Candidate not found" });
+      return res.status(404).json({ message: "Candidate not found" });
     }
     // Säkerställa att det denn HR peson som skapade detta job
     // eftersom HR:en kan se kandidater på sina anonner
-    if (candidate.jobId.createdBy.toString() !== req.user.id) {
+    if (candidate.jobId.createdBy.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         message:
           "Access denied: This candidate belongs to another recuiter's job",
       });
     }
-    const documents = await Documents.findOne({ candidate: id });
+    const documents = await Documents.findOne({ candidateId: id });
     res.status(200).json({
       status: "success",
       "candidate data": { candidate, documents },
@@ -103,9 +112,9 @@ export async function updateCandidate(req, res) {
     const { status } = req.body;
     const candidate = await Candidate.findById(id).populate("jobId");
     if (!candidate) {
-      res.status(404).json({ message: "Candidate not found" });
+      return res.status(404).json({ message: "Candidate not found" });
     }
-    if (candidate.jobId.createdBy.toString() !== req.user.id.toString()) {
+    if (candidate.jobId.createdBy.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         message:
           "Access denied: This candidate belongs to another recuiter's job",
@@ -133,15 +142,15 @@ export async function deleteCandidate(req, res) {
     const { id } = req.params;
     const candidate = await Candidate.findById(id).populate("jobId");
     if (!candidate) {
-      res.status(404).json({ message: "Candidate not found" });
+      return res.status(404).json({ message: "Candidate not found" });
     }
-    if (candidate.jobId.createdBy.toString() !== req.user.id.toString()) {
+    if (candidate.jobId.createdBy.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         message:
           "Access denied: You can only delete candidates for your own jobs",
       });
     }
-    await Candidate.deleteMany({ candidate: id });
+    await Documents.deleteMany({ candidateId: id });
     await Candidate.findByIdAndDelete(id);
     res.status(200).json({
       status: "success",

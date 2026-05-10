@@ -1,4 +1,5 @@
 import Job from "../models/Job.js";
+import Candidate from "../models/Candidate.js"
 
 export async function createJob(req, res) {
   try {
@@ -6,7 +7,7 @@ export async function createJob(req, res) {
     // 2. Lägg till createdBy från den inloggade användaren (req.user.id kommer från auth-middleware)
     const jobData = {
       ...req.body,
-      createdBy: req.user.id,
+      createdBy: req.user._id,
     };
 
     const newJob = await Job.create(jobData);
@@ -34,7 +35,7 @@ export async function getJobs(req, res) {
 
 export async function getMyJobs(req, res) {
   try {
-    const jobs = await Job.find({ createdBy: req.user.id }).populate(
+    const jobs = await Job.find({ createdBy: req.user._id }).populate(
       "createdBy",
       "username email",
     );
@@ -63,7 +64,7 @@ export async function updateJob(req, res) {
     }
     // Om det rätt HR som skapade jobbet
     // Vi kollar om job.createdBy (från DB) matchar req.user.id (från authMiddleware)
-    if (job.createdBy.toString() !== req.user.id) {
+    if (job.createdBy.toString() !== req.user._id.toString()) {
       return res
         .status(403)
         .json({ status: "error", message: "Unauthorized to update this job" });
@@ -94,14 +95,15 @@ export async function deleteJob(req, res) {
     }
     // Om det rätt HR som skapade jobbet
     // Vi kollar om job.createdBy (från DB) matchar req.user.id (från authMiddleware)
-    if (job.createdBy.toString() !== req.user.id) {
+    if (job.createdBy.toString() !== req.user._id.toString()) {
       return res
         .status(403)
         .json({ status: "error", message: "Unauthorized to delete this job" });
     }
     // Genomför borttagningen
     // Vi använder findOneAndDelete för att säkerställa att vi bara tar bort jobbet om det matchar både id och createdBy
-    await Job.findOneAndDelete({ _id: id, createdBy: req.user.id });
+    await Job.findOneAndDelete({ _id: id, createdBy: req.user._id });
+    await Candidate.deleteMany({ jobId: id });
     res
       .status(200)
       .json({ status: "success", message: "Job deleted successfully" });

@@ -8,12 +8,10 @@ const documentsSchema = new mongoose.Schema(
       required: true,
     },
     resume: {
-      data: Buffer,
-      contentType: String,
+      type: String,
     },
     coverLetter: {
-      data: Buffer,
-      contentType: String,
+      type: String,
     },
   },
   { timestamps: true },
