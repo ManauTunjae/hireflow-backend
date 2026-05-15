@@ -68,7 +68,7 @@ export async function loginUser(req, res) {
     // Hitta användare inkludera lösenordhashen
     const user = await User.findOne({ email }).select("+passwordHash");
     if (!user) {
-      return res.status(401).json({ message: "Invalid credentails" });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
