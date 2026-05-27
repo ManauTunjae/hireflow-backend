@@ -22,4 +22,4 @@ services:
     ports: 
       - "5005:5005"
     environment:
-      - MONGODB_URI=mongodb://admin:password@db:27018/webb25_alm?authSource=admin
+      - MONGODB_URI=${MONGODB_URI}
