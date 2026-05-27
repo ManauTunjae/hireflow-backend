@@ -22,8 +22,4 @@ services:
     ports: 
       - "5005:5005"
     environment:
-      - MONGODB_URI=mongodb+srv://manautunjae_database:152990Citron1994@mern-course.jihruzl.mongodb.net/hireflow?appName=MERN-Course
-      - JWT_SECRET=8b6ab41b73034fdde0d490a260dc3bce07e57728830e276d96844abbb496cd8b9549616c5924b7a394084d6d52eb2c0944b264229019ab318af36502bd52402f
-      - CLOUDINARY_CLOUD_NAME=doyn38ftj
-      - CLOUDINARY_API_KEY=488249982694757
-      # - CLOUDINARY_API_SECRET=IaG5Gh5Bsex9AE3UGN4328B2TKI
+      - MONGODB_URI=mongodb://admin:password@db:27018/webb25_alm?authSource=admin
