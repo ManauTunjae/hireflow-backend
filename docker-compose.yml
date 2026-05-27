@@ -1,0 +1,25 @@
+services:
+  db: 
+    image: mongo:latest
+    container_name: hireflow-db
+    ports:
+      - "27018:27018"
+    volumes:
+      - ./data/db:/data/db
+    environment:
+      - MONGODB_INITDB_ROOT_USERNAME=admin
+      - MONGODB_INITDB_ROOT_PASSWORD=password
+  
+  app:
+    image: node:25-alpine
+    container_name: hireflow-backend
+    working_dir: /server
+    volumes:
+     - .:/server
+    depends_on:
+     - db
+    command: ["npm", "start"]
+    ports: 
+      - "5005:5005"
+    environment:
+      - MONGODB_URI=mongodb://admin:password@db:27018/webb25_alm?authSource=admin
