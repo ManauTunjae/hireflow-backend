@@ -1,27 +1,30 @@
 services:
-  db: 
+  db:
     image: mongo:latest
     container_name: hireflow-db
     ports:
-      - "27018:27018"
+      - "27018:27017"
     volumes:
       - ./data/db:/data/db
     environment:
       - MONGODB_INITDB_ROOT_USERNAME=admin
       - MONGODB_INITDB_ROOT_PASSWORD=password
-  
+
   app:
     image: node:25-alpine
     container_name: hireflow-backend
     working_dir: /server
     volumes:
-     - .:/server
+      - .:/server
     depends_on:
-     - db
+      - db
     command: ["npm", "start"]
-    ports: 
+    ports:
       - "5005:5005"
     environment:
-      - MONGODB_URI=${MONGODB_URI}
+      - MONGODB_URI=MONGO_URL=mongodb://admin:password@db:27017/hireflow-db?authSource=admin
       - JWT_SECRET=${JWT_SECRET}
-      - PORT=5005
+      - PORT=${PORT}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
