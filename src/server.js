@@ -32,11 +32,10 @@ app.get("/", (req, res) => {
   res.send("Hello, HireFlow! API is active and running. 🚀");
 });
 
-// Körs bara lokalt
-if (process.env.NODE_ENV !== "production") {
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
-}
+const PORT = process.env.PORT || 5005;
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
 
 export default app;
