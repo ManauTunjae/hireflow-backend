@@ -164,3 +164,22 @@ export async function deleteCandidate(req, res) {
     });
   }
 }
+
+export async function getMyApplications(req, res) {
+  try {
+    // req.user.id kommer direkt från din authMiddleware! 🧠
+    const applications = await Candidate.find({ userRef: req.user.id });
+    
+    // Vi returnerar exakt samma struktur som din frontend förväntar sig
+    return res.status(200).json({
+      status: "success",
+      data: applications
+    });
+  } catch (err) {
+    return res.status(500).json({ 
+      status: "error", 
+      message: "Server error while fetching applications", 
+      err: err.message 
+    });
+  }
+}
