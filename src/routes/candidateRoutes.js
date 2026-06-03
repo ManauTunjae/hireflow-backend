@@ -5,6 +5,7 @@ import {
   getCandidateById,
   updateCandidate,
   deleteCandidate,
+  getMyApplications,
 } from "../controllers/candidateController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import {
@@ -14,6 +15,8 @@ import {
 import upload from "../config/cloudinary.js";
 
 const router = express.Router();
+
+router.get("/my-applications", authMiddleware, getMyApplications);
 
 router.post(
   "/",
