@@ -4,34 +4,35 @@ import Job from "../models/Job.js";
 
 export async function createCandidate(req, res) {
   try {
-    const candidateData = { ...req.body };
-    // Om användaren är inloggad, lägg till referens till användarens ID
-    if (req.user) {
-      candidateData.userRef = req.user._id;
+    // 1. Säkerställ att det är en inloggad användare (kandidat) som söker
+    if (!req.user) {
+      return res.status(401).json({ status: "error", message: "Unauthorized: You must be logged in to apply." });
     }
-    // Skapa kandidaten men namn, mejl osv.
+
+    const candidateData = { 
+      ...req.body,
+      userRef: req.user._id // 2. Tvinga userRef att ALLTID bli den inloggade kandidatens ID! 🔥
+    };
+
+    // Skapa kandidaten i databasen
     const newCandidate = await Candidate.create(candidateData);
-    // Hämta URL-länken från req.files(Cloudinary)
-    const resumeUrl = req.files?.["resume"]
-      ? req.files["resume"][0].path
-      : null;
-    const coverLetterUrl = req.files?.["coverLetter"]
-      ? req.files["coverLetter"][0].path
-      : null;
-    // Kollar om bifogade cv och personliga brev finns
+
+    // Hantera Cloudinary-filer (CV/personligt brev)
+    const resumeUrl = req.files?.["resume"] ? req.files["resume"][0].path : null;
+    const coverLetterUrl = req.files?.["coverLetter"] ? req.files["coverLetter"][0].path : null;
+
     if (resumeUrl || coverLetterUrl) {
       await Documents.create({
         candidateId: newCandidate._id,
         resume: resumeUrl,
         coverLetter: coverLetterUrl,
       });
-      console.log("ID för ny kandidat:", newCandidate._id);
     }
+
     res.status(201).json({
       status: "success",
       message: "Candidate created successfully with documents",
-      data: newCandidate,
-      documents: { resume: resumeUrl, coverLetter: coverLetterUrl },
+      data: newCandidate
     });
   } catch (error) {
     if (error.code === 11000) {
