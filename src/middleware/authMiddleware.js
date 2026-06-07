@@ -35,7 +35,7 @@ export async function authMiddleware(req, res, next) {
 }
 
 export optionalAuth = (req, res, next) => {
-  if (req.headers.authorization) {
+  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
     return authMiddleware(req, res, next);
   }
   next();
