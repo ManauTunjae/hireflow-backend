@@ -5,7 +5,7 @@ const candidateSchema = new mongoose.Schema(
     userRef: {
       type: mongoose.SchemaTypes.ObjectId,
       ref: "User",
-      required: true,
+      required: false,
     },
     jobId: {
       type: mongoose.SchemaTypes.ObjectId,
