@@ -33,3 +33,10 @@ export async function authMiddleware(req, res, next) {
       .json({ status: "error", message: "Unauthorized: Invalid token" });
   }
 }
+
+export optionalAuth = (req, res, next) => {
+  if (req.headers.authorization) {
+    return authMiddleware(req, res, next);
+  }
+  next();
+}
