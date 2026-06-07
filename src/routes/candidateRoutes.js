@@ -21,7 +21,6 @@ router.get("/my-applications", authMiddleware, getMyApplications);
 router.post(
   "/",
   optionalAuth,
-  authMiddleware,
   upload.fields([
     { name: "resume", maxCount: 1 },
     { name: "coverLetter", maxCount: 1 },
