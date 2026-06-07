@@ -7,7 +7,7 @@ import {
   deleteCandidate,
   getMyApplications,
 } from "../controllers/candidateController.js";
-import { authMiddleware } from "../middleware/authMiddleware.js";
+import { authMiddleware, optionalAuth } from "../middleware/authMiddleware.js";
 import {
   validateCandidate,
   updateStatus,
@@ -20,6 +20,7 @@ router.get("/my-applications", authMiddleware, getMyApplications);
 
 router.post(
   "/",
+  optionalAuth,
   authMiddleware,
   upload.fields([
     { name: "resume", maxCount: 1 },
