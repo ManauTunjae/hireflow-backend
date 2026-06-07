@@ -4,15 +4,12 @@ import Job from "../models/Job.js";
 
 export async function createCandidate(req, res) {
   try {
-    // 1. Säkerställ att det är en inloggad användare (kandidat) som söker
-    if (!req.user) {
-      return res.status(401).json({ status: "error", message: "Unauthorized: You must be logged in to apply." });
+    const candidateData = { ...req.body };
+    if (req.user) {
+      candidateData.userRef = req.user._id;
+    } else {
+      candidateData.userRef = null;
     }
-
-    const candidateData = { 
-      ...req.body,
-      userRef: req.user._id // 2. Tvinga userRef att ALLTID bli den inloggade kandidatens ID! 🔥
-    };
 
     // Skapa kandidaten i databasen
     const newCandidate = await Candidate.create(candidateData);
