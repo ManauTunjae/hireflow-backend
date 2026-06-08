@@ -88,7 +88,7 @@ export const validateJobUpdate = [
     .isIn(["open", "closed", "draft"])
     .withMessage("Invalid status value"),
 
-  body("salary").optional().isNumeric().withMessage("Salary must be a number"),
+  body("salary").optional().isString().withMessage("Salary must be a number"),
 
   body("requirements")
     .optional()
