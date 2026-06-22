@@ -33,6 +33,27 @@ export async function getJobs(req, res) {
   }
 }
 
+export async function getJobById(req, res) {
+  try {
+    const { id } = req.params;
+
+    // Hitta jobbet med Mongoose och populera skaparen (precis som i getJobs)
+    const job = await Job.findById(id).populate("createdBy", "username email");
+
+    if (!job) {
+      return res
+        .status(404)
+        .json({ status: "error", message: "Jobannonsen hittades inte" });
+    }
+    res.status(200).json(job);
+  } catch (error) {
+    console.error("Error in getJobById:", error);
+    res
+      .status(500)
+      .json({ status: "error", message: "Server error: Could not fetch job details" });
+  }
+}
+
 export async function getMyJobs(req, res) {
   try {
     const jobs = await Job.find({ createdBy: req.user._id }).populate(
