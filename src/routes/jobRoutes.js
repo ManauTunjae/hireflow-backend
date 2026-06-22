@@ -2,6 +2,7 @@ import express from "express";
 import {
   createJob,
   getJobs,
+  getJobById,
   getMyJobs,
   updateJob,
   deleteJob,
@@ -17,6 +18,7 @@ const router = express.Router();
 router.post("/", authMiddleware, validateJob, createJob);
 router.get("/", getJobs); // Alla kan se alla jobb
 router.get("/my-jobs", authMiddleware, getMyJobs); // HR kan se sina egna jobb
+router.get("/:id", getJobById);
 router.put("/:id", authMiddleware, validateJobUpdate, updateJob);
 router.delete("/:id", authMiddleware, deleteJob);
 
