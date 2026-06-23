@@ -1,6 +1,7 @@
 import Candidate from "../models/Candidate.js";
 import Documents from "../models/Documents.js";
 import Job from "../models/Job.js";
+import { v2 as cloudinary } from "cloudinary";
 
 export async function createCandidate(req, res) {
   try {
@@ -11,13 +12,37 @@ export async function createCandidate(req, res) {
       candidateData.userRef = null;
     }
 
-    // Skapa kandidaten i databasen
+    // 1. Skapa kandidaten i databasen först
     const newCandidate = await Candidate.create(candidateData);
 
-    // Hantera Cloudinary-filer (CV/personligt brev)
-    const resumeUrl = req.files?.["resume"] ? req.files["resume"][0].path : null;
-    const coverLetterUrl = req.files?.["coverLetter"] ? req.files["coverLetter"][0].path : null;
+    let resumeUrl = null;
+    let coverLetterUrl = null;
 
+    // 2. 🔥 MANUELL UPPLADDNING TILL CLOUDINARY MED RAW-TVÅNG
+    // Vi läser filen via dess buffer (från vanlig multer.memoryStorage() eller lokal fil)
+    
+    if (req.files?.["resume"]) {
+      const resumeFile = req.files["resume"][0];
+      // Vi laddar upp med bas64-data eller filens sökväg beroende på din multer-setup
+      const uploadResult = await cloudinary.uploader.upload(resumeFile.path, {
+        folder: "candidate_files",
+        resource_type: "raw", // 🌟 Tvingar Cloudinary att spara som rå dokumentfil!
+        access_mode: "public"  // 🔓 Gör filen helt publik för HR
+      });
+      resumeUrl = uploadResult.secure_url;
+    }
+
+    if (req.files?.["coverLetter"]) {
+      const coverLetterFile = req.files["coverLetter"][0];
+      const uploadResult = await cloudinary.uploader.upload(coverLetterFile.path, {
+        folder: "candidate_files",
+        resource_type: "raw", // 🌟 Tvingar Cloudinary att spara som rå dokumentfil!
+        access_mode: "public"  // 🔓 Gör filen helt publik för HR
+      });
+      coverLetterUrl = uploadResult.secure_url;
+    }
+
+    // 3. Spara länkarna i din Documents-samling
     if (resumeUrl || coverLetterUrl) {
       await Documents.create({
         candidateId: newCandidate._id,
@@ -28,7 +53,7 @@ export async function createCandidate(req, res) {
 
     res.status(201).json({
       status: "success",
-      message: "Candidate created successfully with documents",
+      message: "Candidate created successfully with raw documents 🎉",
       data: newCandidate
     });
   } catch (error) {
