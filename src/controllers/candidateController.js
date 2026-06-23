@@ -44,33 +44,53 @@ export async function createCandidate(req, res) {
 
 export async function getAllCandidates(req, res) {
   try {
-    // Hitta alla job som tillhör specifik HRs annonser
+    // 1. Hitta alla jobb som tillhör specifik HRs annonser
     const myJobs = await Job.find({ createdBy: req.user._id }).select("_id");
     const myJobIds = myJobs.map((job) => job._id);
-    // Filter-objekt baserar på vad HR skriver i URL:en 'candidates?status=interviwing'
+    
+    // Filter-objekt baserat på vad HR skriver i URL:en
     const filter = { jobId: { $in: myJobIds } };
     if (req.query.status) filter.status = req.query.status;
     if (req.query.jobId) filter.jobId = req.query.jobId;
-    // Hämta kandidat baserat på filter
-    const candidates = await Candidate.find(filter)
-      .populate("jobId", "title company")
-      .sort("-createdAt"); // Visa de senaste ansökningarna först
+    
+    // 2. Hämta kandidater och alla dokument parallellt 🚀
+    const [candidates, allDocuments] = await Promise.all([
+      Candidate.find(filter).populate("jobId", "title company").sort("-createdAt"),
+      Documents.find() // Hämtar alla dokumentlänkar
+    ]);
+
     if (candidates.length === 0) {
       return res.status(200).json({
         status: "success",
         message: "No candidates found matching those criteria",
-        date: [],
+        data: [], // 🎯 FIXAT stavfel: Ändrat från 'date: []' till 'data: []' så frontend inte kraschar vid tomt resultat!
       });
     }
+
+    // 3. 🧠 Slå ihop kandidatdatan med rätt dokument live!
+    const candidatesWithDocs = candidates.map((cand) => {
+      // Hitta om det finns dokument kopplade till just denna kandidats ID
+      const matchingDoc = allDocuments.find(
+        (doc) => doc.candidateId?.toString() === cand._id.toString()
+      );
+
+      return {
+        ...cand.toObject(), // Gör om Mongoose-dokument till rent JS-objekt
+        resume: matchingDoc ? matchingDoc.resume : null,
+        coverLetter: matchingDoc ? matchingDoc.coverLetter : null,
+      };
+    });
+
     res.status(200).json({
       status: "success",
-      results: candidates.length,
-      data: candidates,
+      results: candidatesWithDocs.length,
+      data: candidatesWithDocs, // 👍 Nu innehåller varje kandidat resume och coverLetter!
     });
   } catch (error) {
     res.status(500).json({
       status: "error",
       message: "Server error: Could not fetch candidates",
+      error: error.message
     });
   }
 }
