@@ -166,7 +166,7 @@ export async function deleteCandidate(req, res) {
 export async function getMyApplications(req, res) {
   try {
     // req.user.id kommer direkt från din authMiddleware! 🧠
-    const applications = await Candidate.find({ userRef: req.user.id });
+    const applications = await Candidate.find({ email: req.user.email }).populate("jobId");
     
     // Vi returnerar exakt samma struktur som din frontend förväntar sig
     return res.status(200).json({
