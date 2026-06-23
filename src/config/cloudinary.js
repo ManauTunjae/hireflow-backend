@@ -18,7 +18,7 @@ const storage = new CloudinaryStorage({
   params: {
     folder: "candidate_files",
     resource_type: "auto",
-    type: "upload",
+    delivery_type: "upload",
     allowed_formats: ["pdf", "jpg", "png", "doc", "docx"],
   },
 });
