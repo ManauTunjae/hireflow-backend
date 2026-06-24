@@ -2,6 +2,28 @@ import Candidate from "../models/Candidate.js";
 import Documents from "../models/Documents.js";
 import Job from "../models/Job.js";
 
+export async function downloadDocument(req, res) {
+  try {
+    const { id, type } = req.params; // type = "resume" eller "coverLetter"
+
+    const doc = await Documents.findOne({ candidateId: id });
+    if (!doc) return res.status(404).json({ message: "Document not found" });
+
+    const candidate = await Candidate.findById(id).populate("jobId");
+    if (candidate.jobId.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const fileUrl = type === "resume" ? doc.resume : doc.coverLetter;
+    if (!fileUrl) return res.status(404).json({ message: "File not found" });
+
+    // Redirecta till Cloudinary URL med rätt headers
+    res.redirect(fileUrl);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
 export async function createCandidate(req, res) {
   try {
     const candidateData = { ...req.body };
