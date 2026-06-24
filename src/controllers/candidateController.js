@@ -3,6 +3,23 @@ import Documents from "../models/Documents.js";
 import Job from "../models/Job.js";
 import { v2 as cloudinary } from "cloudinary";
 
+const uploadToCloudinaryRaw = (fileBuffer, originalName) => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: "candidate_files",
+        resource_type: "raw", // 🔥 TVINGAR fram rätt mapp i Cloudinary (/raw/upload/)
+        public_id: `${Date.now()}-${originalName}`, // Ger filen ett unikt namn
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result.secure_url);
+      }
+    );
+    uploadStream.end(fileBuffer);
+  });
+};
+
 export async function createCandidate(req, res) {
   try {
     const candidateData = { ...req.body };
@@ -20,26 +37,14 @@ export async function createCandidate(req, res) {
 
     // 2. 🔥 MANUELL UPPLADDNING TILL CLOUDINARY MED RAW-TVÅNG
     // Vi läser filen via dess buffer (från vanlig multer.memoryStorage() eller lokal fil)
-    
     if (req.files?.["resume"]) {
       const resumeFile = req.files["resume"][0];
-      // Vi laddar upp med bas64-data eller filens sökväg beroende på din multer-setup
-      const uploadResult = await cloudinary.uploader.upload(resumeFile.path, {
-        folder: "candidate_files",
-        resource_type: "raw", // 🌟 Tvingar Cloudinary att spara som rå dokumentfil!
-        access_mode: "public"  // 🔓 Gör filen helt publik för HR
-      });
-      resumeUrl = uploadResult.secure_url;
+      resumeUrl = await uploadToCloudinaryRaw(resumeFile.buffer, resumeFile.originalname);
     }
 
     if (req.files?.["coverLetter"]) {
       const coverLetterFile = req.files["coverLetter"][0];
-      const uploadResult = await cloudinary.uploader.upload(coverLetterFile.path, {
-        folder: "candidate_files",
-        resource_type: "raw", // 🌟 Tvingar Cloudinary att spara som rå dokumentfil!
-        access_mode: "public"  // 🔓 Gör filen helt publik för HR
-      });
-      coverLetterUrl = uploadResult.secure_url;
+      coverLetterUrl = await uploadToCloudinaryRaw(coverLetterFile.buffer, coverLetterFile.originalname);
     }
 
     // 3. Spara länkarna i din Documents-samling
