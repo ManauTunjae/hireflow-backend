@@ -26,6 +26,16 @@ export async function downloadDocument(req, res) {
 
 export async function createCandidate(req, res) {
   try {
+    // 🔍 DEBUG LOGS
+    console.log("=== createCandidate HIT ===");
+    console.log("Cloudinary config:", {
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME ? "✅ SET" : "❌ MISSING",
+      api_key: process.env.CLOUDINARY_API_KEY ? "✅ SET" : "❌ MISSING",
+      api_secret: process.env.CLOUDINARY_API_SECRET ? "✅ SET" : "❌ MISSING",
+    });
+    console.log("req.body:", req.body);
+    console.log("req.files:", req.files);
+
     const candidateData = { ...req.body };
     if (req.user) {
       candidateData.userRef = req.user._id;
@@ -33,14 +43,10 @@ export async function createCandidate(req, res) {
       candidateData.userRef = null;
     }
 
-    // 1. Skapa kandidaten i databasen först
     const newCandidate = await Candidate.create(candidateData);
-
-    // 2. Hämta de färdiga, rena RAW-länkarna direkt från req.files 🚀
     const resumeUrl = req.files?.["resume"] ? req.files["resume"][0].path : null;
     const coverLetterUrl = req.files?.["coverLetter"] ? req.files["coverLetter"][0].path : null;
 
-    // 3. Spara länkarna i din Documents-samling
     if (resumeUrl || coverLetterUrl) {
       await Documents.create({
         candidateId: newCandidate._id,
@@ -55,6 +61,12 @@ export async function createCandidate(req, res) {
       data: newCandidate
     });
   } catch (error) {
+    // 🔍 DETALJERAT FEL
+    console.error("=== createCandidate ERROR ===");
+    console.error("Error name:", error.name);
+    console.error("Error message:", error.message);
+    console.error("Error stack:", error.stack);
+
     if (error.code === 11000) {
       return res.status(400).json({
         status: "error",
