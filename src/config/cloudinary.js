@@ -15,8 +15,12 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: "candidate_files",
-    resource_type: "raw", // 🔥 Detta tvingar Cloudinary att köra dokumentmappen (/raw/upload)
-    flags: "attachment",  // 🔓 Gör att filen kan hämtas/öppnas utan restriktioner
+    resource_type: "raw",
+    // 🔥 FIXEN FÖR 404: Denna klipper bort .pdf från namnet innan det skickas!
+    public_id: (req, file) => {
+      const parsedName = file.originalname.split('.').slice(0, -1).join('.');
+      return `${Date.now()}-${parsedName}`;
+    }
   },
 });
 
