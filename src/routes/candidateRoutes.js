@@ -32,7 +32,7 @@ router.post(
 router.get("/", authMiddleware, getAllCandidates);
 router.get("/:id", authMiddleware, getCandidateById);
 // src/routes/candidateRoutes.js
-router.get("/:id/download/:type", protect, authorizeRoles("hr"), downloadDocument);
+router.get("/:id/download/:type", authMiddleware, authorizeRoles("hr"), downloadDocument);
 router.patch("/:id", authMiddleware, updateStatus, updateCandidate);
 router.delete("/:id", authMiddleware, deleteCandidate);
 
