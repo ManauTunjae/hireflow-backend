@@ -1,5 +1,4 @@
 import { v2 as cloudinary } from "cloudinary";
-import { CloudinaryStorage } from "multer-storage-cloudinary";
 import multer from "multer";
 import dotenv from "dotenv";
 
@@ -12,18 +11,13 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// 2. Ställ in lagringen
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: "candidate_files",
-    resource_type: "auto",
-    delivery_type: "upload",
-    allowed_formats: ["pdf", "jpg", "png", "doc", "docx"],
-  },
-});
+// 2. 🧠 Lagra filen tillfälligt i serverns minne i stället för som en bild på Cloudinary
+const storage = multer.memoryStorage();
 
 // 3. Skapa Multer-instansen
-const upload = multer({ storage: storage });
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 } // Gräns på 5MB per dokument
+});
 
 export default upload;
