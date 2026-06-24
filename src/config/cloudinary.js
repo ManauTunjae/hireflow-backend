@@ -16,7 +16,8 @@ const storage = new CloudinaryStorage({
   params: {
     folder: "candidate_files",
     resource_type: "raw",
-    // 🔥 FIXEN FÖR 404: Denna klipper bort .pdf från namnet innan det skickas!
+    format: "pdf", 
+    flags: "attachment", 
     public_id: (req, file) => {
       const parsedName = file.originalname.split('.').slice(0, -1).join('.');
       return `${Date.now()}-${parsedName}`;
