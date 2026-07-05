@@ -163,6 +163,17 @@ export async function getCandidateById(req, res) {
   }
 }
 
+export async function getMyApplications(req, res) {
+  try {
+    const applications = await Candidate.find({ userRef: req.user._id })
+      .populate("jobId")
+      .sort("-createdAt");
+    return res.status(200).json({ status: "success", data: applications });
+  } catch (err) {
+    return res.status(500).json({ status: "error", message: err.message });
+  }
+}
+
 export async function updateCandidate(req, res) {
   try {
     const { id } = req.params;
