@@ -168,9 +168,17 @@ export async function getMyApplications(req, res) {
     const applications = await Candidate.find({ userRef: req.user._id })
       .populate("jobId")
       .sort("-createdAt");
-    return res.status(200).json({ status: "success", data: applications });
+
+    return res.status(200).json({
+      status: "success",
+      data: applications,
+    });
   } catch (err) {
-    return res.status(500).json({ status: "error", message: err.message });
+    return res.status(500).json({
+      status: "error",
+      message: "Server error while fetching applications",
+      err: err.message,
+    });
   }
 }
 
@@ -229,25 +237,6 @@ export async function deleteCandidate(req, res) {
       status: "error",
       message: "Server error: Could not fetch a candidate",
       error: error.message,
-    });
-  }
-}
-
-export async function getMyApplications(req, res) {
-  try {
-    const applications = await Candidate.find({
-      email: req.user.email,
-    }).populate("jobId");
-
-    return res.status(200).json({
-      status: "success",
-      data: applications,
-    });
-  } catch (err) {
-    return res.status(500).json({
-      status: "error",
-      message: "Server error while fetching applications",
-      err: err.message,
     });
   }
 }
